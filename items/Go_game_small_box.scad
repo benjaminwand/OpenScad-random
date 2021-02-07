@@ -48,6 +48,8 @@ module drawer()
                 cube([dist13*6.5, dist13*11, pin + minW], false);
             handle();
         }
+        translate([0, 0, 5]) 
+            cube([20, dist13*11 -2*minW, 10], true);
         translate([2 + minW, dist13*-5.5 + minW, -pin/2 + minW/2]) 
             cube([dist13*6.5 -2*minW, dist13*11 -2*minW, pin + minW], false);
     };
