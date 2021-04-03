@@ -1,6 +1,6 @@
 step = 0.4;   // height of steps
 size = 10;  // width of squares
-base = 0;   // 0/1 for off/on
+base = 1;   // 0/1 for off/on
 
 colors = ["black", "white"];
 
