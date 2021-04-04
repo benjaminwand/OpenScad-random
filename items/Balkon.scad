@@ -1,6 +1,6 @@
 // variables
 // roughly the size of straight parts of curves
-fs = 0.3;
+fs = 0.4;
 s = 0.5;   // scale
 
 // Höhen und Breiten Balustrade
@@ -64,7 +64,10 @@ ti=3;
 tii=-0.1;
 
 // Béziere curve code
+function add(v) = [for(p=v) 1]*v;   // from https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Tips_and_Tricks#Add_all_values_in_a_list
 function fn(a, b) = round(sqrt(pow(a[0]-b[0],2) + pow(a[1]-b[1], 2))/fs);
+function fn_all(pts) = add([for(i=[0:len(pts)-2]) fn(pts[i], pts[i+1]), 
+    fn(pts[0], pts[len(pts)-1])*5])/6;
         
 function b_pts(pts, n, idx) =
     len(pts)>2 ? 
@@ -74,7 +77,7 @@ function b_pts(pts, n, idx) =
             + pts[1] * (1-n*idx);
 
 function b_curv(pts) =
-    let (fn=fn(pts[0], pts[len(pts)-1]))
+    let (fn=fn_all(pts))
     [for (i= [0:fn]) concat(b_pts(pts, 1/fn, i))];
     
 
@@ -197,7 +200,7 @@ translate([0, 0, h13*s-0.01])linear_extrude(5*s) polygon(points = [
     [-143.5*s, 98*s],
     [-143.5*s, 131.6*s]]);
 */
-// Boden        
+// Boden 
 translate([0, 0, -7*s])linear_extrude(7*s+0.05) polygon(points = [
     [-197.5*s, 131.6*s],
     [-197.5*s, 98*s],
@@ -220,3 +223,18 @@ translate([0, 0, -7*s])linear_extrude(7*s+0.05) polygon(points = [
     [197.5*s, 98*s],
     [197.5*s, 131.6*s]
     ]);
+    
+module stripe() cube([3, 50, 15], true);
+
+module star()
+for (i= [0:60:350]) rotate([0, 0, i])
+translate([0, 5, 0])intersection() {
+    rotate([0, 0, -30])stripe();
+    rotate([0, 0, 30])stripe();
+    }
+module stars() translate([0-5, 0, 0]) rotate([0, 0, 90]){   
+for (x= [15: 17.5: 70], y=[-60: 20: 60]) translate([x, y, 0]) star();
+for (x= [15: 17.5: 70], y=[-70: 20: 60]) translate([x, y, 1]) star();
+for (x= [23.75: 17.5: 70], y=[-65: 20: 70]) translate([x, y, 2]) star();};
+
+//color("black")stars();
