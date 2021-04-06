@@ -1,10 +1,10 @@
-// variables
-// roughly the size of straight parts of curves
+// Variablen
+// Ungefähr die Seitenlängen der geraden Stücke der Béziere-Kurven
 fs = 0.4;
-s = 0.5;   // scale
+s = 0.5;   // Scale
 
-// Höhen und Breiten Balustrade
-distance = 27*s; // distance between columns
+// Höhen und Breiten eines Balustraden-Töpfchens
+distance = 27*s; // Abstand zwischen Säulen
 lower_block = 21.7;
 higher_block = 20.2;
 h1 = 7.2;
@@ -31,7 +31,7 @@ w12 = 60.6/PI;
 h12 = 69;
 h13 = 76;
 
-// Béziere curve points
+// Béziere-Kurven-Punkte
 p1 = [w1/2, h1];
 p2 = [w1/2, 10.5];
 p3 = [w1/2, 11.8];
@@ -56,14 +56,14 @@ p21 = [9.5, 65];
 p22 = [9.7, 66];
 p23 = [w12/2, h12];
 
-// Relief
+// Relief der eckigen Säulen
 a1=5;
 a2=8;
 a3=11;
 ti=3;
 tii=-0.1;
 
-// Béziere curve code
+// Béziere Code
 function add(v) = [for(p=v) 1]*v;   // from https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Tips_and_Tricks#Add_all_values_in_a_list
 function fn(a, b) = round(sqrt(pow(a[0]-b[0],2) + pow(a[1]-b[1], 2))/fs);
 function fn_all(pts) = add([for(i=[0:len(pts)-2]) fn(pts[i], pts[i+1]), 
@@ -80,7 +80,6 @@ function b_curv(pts) =
     let (fn=fn_all(pts))
     [for (i= [0:fn]) concat(b_pts(pts, 1/fn, i))];
     
-
 beziere_points_higher =  concat(    
     [[0, h12]],
     b_curv([p20, p21, p22, p23]),
@@ -100,7 +99,7 @@ beziere_points_lower =  concat(
     [[0, 0]]
     );
 
-//     
+// Oberer und unterer Säulen-Teil
 module 1topf_higher()scale(s)
     {rotate_extrude($fn = 50)polygon(points = beziere_points_higher);
     translate([0, 0, h13/2+h12/2])cube([higher_block, higher_block, h13-h12], true);
@@ -114,9 +113,7 @@ topf_placements=[for (i= [-5.5:-1.5]) [i*distance, 0, 0],
     for (i= [1.5:5.5]) [i*distance, 0, 0],
     for (i= [0:2], j=[-5.5*distance - lower_block/sqrt(2), 5.5*distance + lower_block/sqrt(2)]) [j, i*distance + lower_block/sqrt(2), 0]];
 
-
-
-
+// Relief 
 module full_relief(b) polyhedron(points=[
 [-b/2+a3, tii, h13/2-a3],
 [-b/2+a1, tii, -h13/2+a1],[-b/2+a2, ti, -h13/2+a2],[-b/2+a3, tii, -h13/2+a3],
@@ -223,18 +220,3 @@ translate([0, 0, -7*s])linear_extrude(7*s+0.05) polygon(points = [
     [197.5*s, 98*s],
     [197.5*s, 131.6*s]
     ]);
-    
-module stripe() cube([3, 50, 15], true);
-
-module star()
-for (i= [0:60:350]) rotate([0, 0, i])
-translate([0, 5, 0])intersection() {
-    rotate([0, 0, -30])stripe();
-    rotate([0, 0, 30])stripe();
-    }
-module stars() translate([0-5, 0, 0]) rotate([0, 0, 90]){   
-for (x= [15: 17.5: 70], y=[-60: 20: 60]) translate([x, y, 0]) star();
-for (x= [15: 17.5: 70], y=[-70: 20: 60]) translate([x, y, 1]) star();
-for (x= [23.75: 17.5: 70], y=[-65: 20: 70]) translate([x, y, 2]) star();};
-
-//color("black")stars();
