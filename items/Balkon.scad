@@ -63,11 +63,14 @@ a3=11;
 ti=3;
 tii=-0.1;
 
-// Béziere Code
+// Bézier Code
 function add(v) = [for(p=v) 1]*v;   // from https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Tips_and_Tricks#Add_all_values_in_a_list
 function fn(a, b) = round(sqrt(pow(a[0]-b[0],2) + pow(a[1]-b[1], 2))/fs);
-function fn_all(pts) = add([for(i=[0:len(pts)-2]) fn(pts[i], pts[i+1]), 
-    fn(pts[0], pts[len(pts)-1])*5])/6;
+function fn_all(pts) = 
+    add(
+        [for(i=[0:len(pts)-2]) 
+            fn(pts[i], pts[i+1]), fn(pts[0], pts[len(pts)-1])*5])
+    /6;
         
 function b_pts(pts, n, idx) =
     len(pts)>2 ? 
@@ -80,12 +83,12 @@ function b_curv(pts) =
     let (fn=fn_all(pts))
     [for (i= [0:fn]) concat(b_pts(pts, 1/fn, i))];
     
-beziere_points_higher =  concat(    
+bezier_points_higher =  concat(    
     [[0, h12]],
     b_curv([p20, p21, p22, p23]),
     [[0, h12-1]]
     );
-beziere_points_lower =  concat(    
+bezier_points_lower =  concat(    
     [[0, h12-1]],
     b_curv([p19, p20]),
     b_curv([p17, p18, p19]),
@@ -101,13 +104,13 @@ beziere_points_lower =  concat(
 
 // Oberer und unterer Säulen-Teil
 module 1topf_higher()scale(s)
-    {rotate_extrude($fn = 50)polygon(points = beziere_points_higher);
+    {rotate_extrude($fn = 50)polygon(points = bezier_points_higher);
     translate([0, 0, h13/2+h12/2])cube([higher_block, higher_block, h13-h12], true);
     }
   
 module 1topf_lower()scale(s)
     {translate([0, 0, h1/2])cube([lower_block, lower_block, h1], true); 
-    rotate_extrude($fn = 50)polygon(points = beziere_points_lower);}
+    rotate_extrude($fn = 50)polygon(points = bezier_points_lower);}
 
 topf_placements=[for (i= [-5.5:-1.5]) [i*distance, 0, 0],
     for (i= [1.5:5.5]) [i*distance, 0, 0],
