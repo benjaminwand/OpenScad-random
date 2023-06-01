@@ -1,9 +1,9 @@
 p_x = 20;   // side length of puzzle piece
 p_y = 25;   // side length of puzzle piece
 p_z = 2;    // height of puzzle piece
-d = 0.5;    // distance between puzzle pieces
+d = 0.3;    // distance between puzzle pieces
 h_s = 0.35;  // handle sizes
-h_d = 0.1;  // handle distance
+h_d = 0.12;  // handle distance
 amount = [1, 4]; // how many pieces one wants
 $fn = 50;
 
