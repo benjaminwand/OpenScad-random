@@ -20,9 +20,7 @@ module piece(){
         translate([p_x * 0.5, p_y * h_d]) bigdot();
     }
     translate([p_x * (h_d + 1), p_y * 0.5]) smalldot();
-    translate([p_x * 0.5, p_y * (h_d + 1)]) smalldot();
-        
-    
+    translate([p_x * 0.5, p_y * (h_d + 1)]) smalldot();   
 }
 
 module puzzle() 
