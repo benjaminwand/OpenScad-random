@@ -8,7 +8,7 @@ amount = [10, 10]; // how many pieces one wants
 $fn = 50;
 
 module smalldot() 
-resize([p_x * h_s -d, p_y * h_s - d]) cylinder(p_z, 10, 10, true);
+resize([p_x * h_s -d, p_y * h_s - d]) cylinder(p_z, 10, 10);
 
 module bigdot()
 resize([p_x * h_s +d, p_y * h_s +d]) cylinder(p_z*3, 10, 10, true);
@@ -19,8 +19,8 @@ module piece(){
         translate([p_x * h_d, p_y * 0.5]) bigdot();
         translate([p_x * 0.5, p_y * h_d]) bigdot();
     }
-    translate([p_x * (h_d + 1), p_y * 0.5, p_z/2]) smalldot();
-    translate([p_x * 0.5, p_y * (h_d + 1), p_z/2]) smalldot();
+    translate([p_x * (h_d + 1), p_y * 0.5]) smalldot();
+    translate([p_x * 0.5, p_y * (h_d + 1)]) smalldot();
         
     
 }
