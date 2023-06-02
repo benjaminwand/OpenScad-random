@@ -25,10 +25,6 @@ module piece(){
 
 module puzzle() 
 for (x= [0 : amount[0]-1], y = [0 : amount[1]-1]) 
-    translate([x * p_x, y * p_y]) piece();
-
+    translate([x * p_x, y * p_y]) piece(); 
+        
 puzzle();
-
-color("blue") translate([87, 87]) resize([380, 380]) rotate([0, 0, 180])
-import("/Users/Ben/Desktop/Penrose.stl");
-
