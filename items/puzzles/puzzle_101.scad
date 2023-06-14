@@ -1,18 +1,20 @@
-p_x = 19;       // side length of puzzle piece
-p_y = 19;       // side length of puzzle piece
-p_z = 2.4;      // height of puzzle piece
-d = 0.3;        // distance between puzzle pieces
+// variales to adjust
+p_z = 2.5;      // height of puzzle piece
 h_s = 0.35;     // knob sizes
 h_d = 0.13;     // knob distance
-sl = 20;        // leave size
+d = 0.3;        // distance between puzzle pieces
 dc = 0.6;       // depth of carving
-amount = [10, 10]; // how many pieces one wants
+fs = 3.5;       // roughly the size of straight party of curves
 $fn = 50;
-fs = 1.8;         // roughly the size of straight party of curves
 
+// constant
+p_x = 19;           // side length of puzzle piece
+p_y = 19;           // side length of puzzle piece
+sl = 20;            // leave size
+amount = [10, 10];  // how many pieces one wants
 shuffle = [02,49,76,93,79,82,7,50,69,54,81,57,23,92,71,88,17,01,18,77,97,90,89,60,83,04,42,70,86,84,55,62,12,09,99,10,98,45,29,40,37,33,38,28,68,95,78,58,75,15,53,87,06,48,64,32,34,74,66,63,31,41,00,14,35,46,11,27,91,30,85,03,26,52,13,08,72,21,73,25,20,39,16,19,61,96,56,43,05,67,44,36,47,59,65,24,22,80,51,94];
 
-{       // puzzle with penrose pattern
+{       // penrose puzzle modules
 module smalldot() 
 resize([p_x * h_s -d, p_y * h_s - d]) cylinder(p_z, 10, 10);
 
@@ -37,19 +39,19 @@ translate([87, 87, p_z - dc]) resize([380, 380]) rotate([0, 0, 180])
 module puzzle() 
 for (x= [0 : amount[0]-1], y = [0 : amount[1]-1]) 
     translate(          // shuffel around
-                [shuffle[x*10+y]%10*p_x, 
-                floor(shuffle[x*10+y]/10)*p_y])                   
+        [shuffle[x*10+y]%10*p_x, 
+        floor(shuffle[x*10+y]/10)*p_y])                   
 translate([-x * p_x, -y * p_y])     // bring back to 0/0
-difference(){
-    translate([x * p_x, y * p_y]) piece(); 
-    penrose_tiles();
-}
+    difference(){
+        translate([x * p_x, y * p_y]) piece(); 
+        penrose_tiles();
+    }
 }
 
 {       // bezier curve modules
 function fn(a, b) = round(sqrt(pow(a[0]-b[0],2) + (pow(a[1]-b[1], 2)))/fs);
     
-module shape() cylinder(2*dc, 1, 1, true);
+module shape() cylinder(2 * dc, 1, 1, true);
 
 function b_pts(pts, n, idx) =
     len(pts)>2 ? 
@@ -60,18 +62,6 @@ function b_pts(pts, n, idx) =
     
 module b_curve(pts) 
     let (idx=fn(pts[0], pts[len(pts)-1]), n = 1/idx){
-        for (x=[-p_x*amount[0], 0, p_x*amount[0]], y = [- p_y*amount[1],0,  p_y*amount[1]])
-    translate([x, y])
-        for (i= [0:idx-1])  {
-            hull(){ 
-               translate(b_pts(pts, n, i)) shape();
-               translate(b_pts(pts, n, i+1)) shape();          
-            };
-        }
-    };
-    
-module b_curve_leave(pts) 
-    let (idx=fn(pts[0], pts[len(pts)-1]), n = 1/idx){
         for (i= [0:idx-1]) {
             hull(){ 
                translate(b_pts(pts, n, i)) shape();
@@ -81,9 +71,7 @@ module b_curve_leave(pts)
     };
 };
 
-
-
-module flower1(){
+module flower1(){   
 p1 = [18, 12];
 p2 = [15, 4.5];
 p3 = [8, 10];
@@ -262,18 +250,16 @@ b_curve([s41, s42, s42b, s43]);
 };
 
 module leaf() {
-b_curve_leave([[0, 0], [sl/2.8, sl/2], [0, sl]]);
-mirror([1, 0, 0]) b_curve_leave([[0, 0], [sl/3, sl/2], [0, sl]]); 
+b_curve([[0, 0], [sl/2.8, sl/2], [0, sl]]);
+mirror([1, 0, 0]) b_curve([[0, 0], [sl/3, sl/2], [0, sl]]); 
 }
 module littleflower() 
 for (i = [0:72:350]) rotate([0, 0, i]){
-    b_curve_leave([[0, 0], [sl*0.28, sl*0.3], [0, sl*0.6]]);
-    mirror([1, 0, 0]) b_curve_leave([[0, 0], [sl*0.28, sl*0.3], [0, sl*0.6]]);
+    b_curve([[0, 0], [sl*0.28, sl*0.3], [0, sl*0.6]]);
+    mirror([1, 0, 0]) b_curve([[0, 0], [sl*0.28, sl*0.3], [0, sl*0.6]]);
 }
 
 module leaves_and_littleflowers(){
-for (x=[-p_x*amount[0], 0, p_x*amount[0]], y = [- p_y*amount[1],0,  p_y*amount[1]])
-    translate([x, y]){
 translate([88, 19]) rotate([0, 0, 100]) leaf();
 translate([78, 37]) rotate([0, 0, 30]) leaf();
 translate([98, 59]) rotate([0, 0, -40]) leaf();
@@ -319,19 +305,18 @@ translate([107, 89]) rotate([0, 0, -85]) leaf();
 translate([183, 153]) rotate([0, 0, -15]) leaf();
 translate([178, 170]) rotate([0, 0, 65]) leaf();
 translate([174, 184]) rotate([0, 0, -25]) leaf();
-
-    };  
 };
-
-
 
 // flow control
 difference(){
     puzzle();
-    flower1();
-    flower2();
-    flower3();
-    flower4();
-    branches();
-    leaves_and_littleflowers();
+    for (x=[-p_x*amount[0], 0, p_x*amount[0]], y = [- p_y*amount[1],0,  p_y*amount[1]])
+        translate([x, y]){
+            flower1();
+            flower2();
+            flower3();
+            flower4();
+            branches();
+            leaves_and_littleflowers();
+        }
 }
