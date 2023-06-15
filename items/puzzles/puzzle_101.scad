@@ -1,4 +1,4 @@
-// variales to adjust
+// variables to adjust
 p_z = 2.5;      // height of puzzle piece
 h_s = 0.35;     // knob sizes
 h_d = 0.13;     // knob distance
