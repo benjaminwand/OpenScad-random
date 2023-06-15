@@ -1,3 +1,7 @@
+/*
+Two-sided puzzle with mutually exclusive solutions.
+*/
+
 // variables to adjust
 p_z = 2.5;      // height of puzzle piece
 h_s = 0.35;     // knob sizes
