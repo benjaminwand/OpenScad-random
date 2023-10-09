@@ -132,7 +132,7 @@ else
     translate([0, y_translate, shell - rim]) linear_extrude(2 * letter_depth, center=true) 
         text(str(txt), size=size, valign=valign, halign=halign, font=font);
 
-// main modules
+// main module
 module piece(z, n, m, gap=0, round_out=false) // 5/6, number, modes, gap, round_out
 let (movedown = z==5 ? hpent : hhex) color( z==5 ? [gray, gray, gray] : "white") 
 intersection(){
@@ -175,6 +175,7 @@ module whole_ball() {
     }
 }
 
+// data
 whole_ball() {
     rotate([hp,0,60]) piece(5, 32, [1, 1, 1, 1, 1], $gap, $round_out);
     piece(6, 31, [1, 1, 1, 1, 0, 1], $gap, $round_out);
