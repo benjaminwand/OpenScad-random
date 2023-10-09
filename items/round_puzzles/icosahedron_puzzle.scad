@@ -53,6 +53,7 @@ hp = atan(rhex*cos(30)/hhex)+atan(rpent*cos(72/2)/hpent);
 pp = 2*atan(rpent/hpent) + 2*atan((s/2)/(hhex/cos(hh/2))); 
 
 // words
+// in English: "Just as restlessly, the water wants to pull the earth, which it reluctantly left, back into its abyss, the air, which should kindly envelop and animate us, suddenly rushes along as a storm"
 encoding = ["eben", "so", "unruhig", "möchte", "das", "Wasser", "die (1)", "Erde", "die (2)", "es", "ungern", "verließ", "wieder", "in", "seinen", "Abgrund", "reißen", "die (3)", "Luft", "die (4)", "uns", "freundlich", "umhüllen", "und", "beleben", "sollte", "rast", "auf", "einmal", "als", "Sturm", "daher"];
 
 // spheres
