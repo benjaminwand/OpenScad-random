@@ -1,4 +1,7 @@
 ## FreeCAD backup files:
 **/*.svg
 **/*.DS_Store
+
+## helper stl
 items/puzzles/Penrose.stl
+items/round_puzzles/Low_poly_earth.stl

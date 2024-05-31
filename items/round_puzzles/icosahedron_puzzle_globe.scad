@@ -1,33 +1,33 @@
 /*
-Round Truncated Icosahedron puzzle
+Globe shaped Truncated Icosahedron puzzle
 https://en.wikipedia.org/wiki/Truncated_icosahedron
 
-Inspired by an idea of Kerry Williams, who wants to make large objects 3d-printable by making them into puzzles. This was a more mainstreamy version of the first prototype of this project.
+Inspired by an idea of Kerry Williams, who wants to make large objects 3d-printable by making them into puzzles. 
 
 Thanks to Lukas Süss aka mechadense for typing the math into an OpenSCAD file!
 https://www.printables.com/de/model/430670-truncated-icosahedron-rounded-soccer-form
 
-The optional text inside the pieces is from Johann Wolfgang von Goethes Versuch einer Witterungslehre, 1825
+Thanks to @Openscaddad for the globe file!
+https://www.printables.com/de/model/277981-low-poly-earth-globe/files
+You need to have Low_poly_earth.stl in the same folder as this file. 
+Otherwise you might use a different globe file, for instance with more vertices, and import it as globe() 
+
+The optional text inside the pieces is from Johann Wolfgang von Goethes "Versuch einer Witterungslehre", 1825
 */
 
 // parameters
-s = 101;                 // basic edge length, shall be 101 for 50 cm ball
+s = 65;                // basic edge length, shall be 101 for 50 cm ball
 w = s/6;                // max width of dovetail
 gap = 0.3;              // gap between puzzle pieces
-shell = 12;             // shell thickness 
+shell = 10;             // shell thickness 
 letter_depth = 1 + s * 0.01;    // letter relief depth/height
 rim = s * 0.02;         // to keep the last piece from falling inside
 
 // design options
-interval = [0:31];       // which pieces do you want? [0:31] for all of them
-round_in = 1;           // do you want it curved inside ?
+interval = [0];       // which pieces do you want? [0:31] for all of them
+round_in = 0;           // do you want it curved inside ?
 engraving = 1;          // do you want a sentence inside ?
-outside_numbers = 1;    // do you want the pieces numbered on the outside ?
-braille_numbers = 1;    // do you want braille numbering inside ?
-
-gaps_only = 0;          // only the gaps, development option
-gray = 0.3;             // brightness for (soccer ball) pentagons
-
+braille_numbers = 0;    // do you want braille numbering inside ?
 
 // maths
 
@@ -52,13 +52,15 @@ hp = atan(rhex*cos(30)/hhex)+atan(rpent*cos(72/2)/hpent);
 // angel pent-center to pent-center from body center
 pp = 2*atan(rpent/hpent) + 2*atan((s/2)/(hhex/cos(hh/2))); 
 
+
 // words
 // in English: "Just as restlessly, the water wants to pull the earth, which it reluctantly left, back into its abyss, the air, which should kindly envelop and animate us, suddenly rushes along as a storm"
 encoding = ["eben", "so", "unruhig", "möchte", "das", "Wasser", "die (1)", "Erde", "die (2)", "es", "ungern", "verließ", "wieder", "in", "seinen", "Abgrund", "reißen", "die (3)", "Luft", "die (4)", "uns", "freundlich", "umhüllen", "und", "beleben", "sollte", "rast", "auf", "einmal", "als", "Sturm", "daher"];
 
 // spheres
-module small_sphere() sphere(r=sph_diam - shell, $fa=4, $fs=0.1);
-module outer_sphere() sphere(r=sph_diam, $fa=4, $fs=0.1);
+module inner_sphere() sphere(r=sph_diam - shell, $fa=4, $fs=0.1);
+module globe() resize([sph_diam*2, sph_diam*2, sph_diam*2])
+    import("Low_poly_earth.stl");       // import globe stl
 
 // dovetail pattern
 side_straight = [[-s/2, 0],[-s/2, -w*1.2],[s/2, -w*1.2]];
@@ -117,78 +119,68 @@ else
         text(str(txt), size=size, valign=valign, halign=halign, font=font);
 
 // main module
-module piece(z, n, m, gap=0, round_out=false) // 5/6, number, modes, gap, round_out
-let (movedown = z==5 ? hpent : hhex) color( z==5 ? [gray, gray, gray] : "white") 
-intersection(){
-    if (round_out==true) outer_sphere();
+module piece(z, n, m, gap=0) // 5/6, number, modes, gap
+let (movedown = z==5 ? hpent : hhex)  
     translate([0,0,-movedown]) {
         difference(){
             translate([0,0,-s*0.24 -rim +gap]) linear_extrude(shell + s*0.24, center=false) 
                 offset(gap, $fn=8) 
                     polygon( [ for (i=[0:z-1], v=move(z, m[i])) turn(v, 360/z*i)]);
             #if (engraving) inside_text(z, encoding[n-1], s/5, valign="bottom", halign="center");
-            #if (outside_numbers) translate([0,0,z==5 ? -s*0.15 : -s*0.21]) linear_extrude(5) 
-                mirror([1,0,0]) text(str(n), size=s/2, valign="center", halign="center");
-            if (round_in && round_out) translate([0,0,movedown]) small_sphere();
+            if (round_in && !$gap) translate([0,0,movedown]) inner_sphere();
             if (braille_numbers && !round_in) braille_stamp(z=z,txt=(str("#", n)), 
                 size= 5+s*0.01, y_translate = -s/3);
         };
         if (braille_numbers && round_in) inside_text(movedown,txt=(str("#", n)), 
             size= 5+s*0.01, "top", "center", font="braille_deutsch", y_translate = -s/5);
-    }
-};
+    };
 
 // flow control 
-module whole_ball() {
-    // gaps
-    if (gaps_only) for (i = interval)
-        difference() {
-            let($gap = gap, $round_out=false) children(i);
-            let($gap = 0, $round_out=false) children(i);
-            if (round_in) small_sphere();
-        }
-    // pieces
-    else for (i = interval) {
-        difference(){
-            let($gap = 0, $round_out=true) children(i);
-            if (i > 0) for (k = [0:i-1]) let($gap = gap, $round_out=false) children(k);
+module whole_ball() 
+    for (i = interval) {
+        intersection(){
+            globe();
+            difference(){
+                let($gap = 0) children(i);
+                if (i > 0) for (k = [0:i-1]) let($gap = gap) children(k);
+            };
         };
         echo(encoding[31-i]);
     }
-}
+
 
 // data
 whole_ball() {
-    rotate([hp,0,60]) piece(5, 32, [1, 1, 1, 1, 1], $gap, $round_out);
-    piece(6, 31, [1, 1, 1, 1, 0, 1], $gap, $round_out);
-    rotate([hh,0,0]) piece(6, 30, [0, 1, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hh,0,0]) rotate([hh,0,60]) piece(6, 29, [0, 1, 1, 1, 1, 0, 1], $gap, $round_out);
-    rotate([hp+pp,180,0]) rotate([0,0,180]) piece(5, 28, [0, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hh,0,0]) rotate([hh,0,-60]) piece(6, 27, [0, 1, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hp,0,-60]) piece(5, 26, [0, 1, 1, 0, 0], $gap, $round_out);
-    rotate([hh,0,-120]) piece(6, 25, [0, 1, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hp,0,180]) piece(5, 24, [0, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hh,0,120]) piece(6, 23, [0, 0, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hh,0,120]) rotate([hh,0,-60]) piece(6, 22, [0, 0, 0, 1, 1, 1], $gap, $round_out);
-    rotate([hp+pp,0,60]) rotate([0,0,180]) piece(5, 21, [1, 1, 0, 0, 1], $gap, $round_out);
-    rotate([hh,0,-120]) rotate([hh,180,240]) piece(6, 20, [1, 1, 1, 1, 0, 0], $gap, $round_out);
-    rotate([hp+pp,180,120]) rotate([0,0,180]) piece(5, 19, [0, 0, 0, 1, 1], $gap, $round_out);
-    rotate([hh,0,120]) rotate([hh,0,60]) piece(6, 18, [0, 0, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hh,0,-120]) rotate([hh,0,-60]) piece(6, 17, [0, 0, 0, 1, 1, 1], $gap, $round_out);
-    rotate([hp+pp,180,-120]) rotate([0,0,180]) piece(5, 16, [0, 0, 1, 1, 1], $gap, $round_out);
-    rotate([hh,0,-120]) rotate([hh,0,60]) piece(6, 15, [0, 0, 1, 1, 0, 0], $gap, $round_out);
-    rotate([hp+pp,0,-60]) rotate([0,0,180]) piece(5, 14, [1, 1, 0, 0, 1], $gap, $round_out);
-    rotate([hh,0,120]) rotate([hh,180,120]) piece(6, 13, [1, 0, 0, 0, 1, 1], $gap, $round_out);
-    rotate([hh,0,0]) rotate([hh,180,240]) piece(6, 12, [1, 1, 0, 0, 0, 1], $gap, $round_out);
-    rotate([hp+pp,0,180]) rotate([0,0,180]) piece(5, 11, [1, 0, 0, 0, 1], $gap, $round_out);
-    rotate([hh,0,0]) rotate([hh,180,120]) piece(6, 10, [1, 0, 0, 0, 0, 1], $gap, $round_out);
-    rotate([hp,180,120]) piece(5, 9, [1, 1, 0, 0, 1], $gap, $round_out);
-    rotate([hh,180,60]) piece(6, 8, [1, 0, 0, 0, 1, 1], $gap, $round_out);
-    rotate([hh,0,-120]) rotate([hh,180,120]) piece(6, 7, [0, 0, 0, 0, 1, 1], $gap, $round_out);
-    rotate([hh,0,120]) rotate([hh,180,240]) piece(6, 6, [1, 1, 0, 0, 0, 0], $gap, $round_out);
-    rotate([hp,180,0]) piece(5, 5, [1, 0, 0, 0, 1], $gap, $round_out);
-    rotate([180,0,0]) piece(6, 4, [0, 1, 1, 1, 0, 0], $gap, $round_out);
-    rotate([hh,180,180]) piece(6, 3, [0, 1, 0, 0, 0, 0], $gap, $round_out);
-    rotate([hp,180,-120]) piece(5, 2, [0, 1, 0, 0, 0], $gap, $round_out);
-    rotate([hh,180,-60]) piece(6, 1, [0, 0, 0, 0, 0, 0], $gap, $round_out);
+    rotate([hp,0,60]) piece(5, 32, [1, 1, 1, 1, 1], $gap);
+    piece(6, 31, [1, 1, 1, 1, 0, 1], $gap);
+    rotate([hh,0,0]) piece(6, 30, [0, 1, 1, 1, 1, 0], $gap);
+    rotate([hh,0,0]) rotate([hh,0,60]) piece(6, 29, [0, 1, 1, 1, 1, 0, 1], $gap);
+    rotate([hp+pp,180,0]) rotate([0,0,180]) piece(5, 28, [0, 1, 1, 1, 0], $gap);
+    rotate([hh,0,0]) rotate([hh,0,-60]) piece(6, 27, [0, 1, 1, 1, 1, 0], $gap);
+    rotate([hp,0,-60]) piece(5, 26, [0, 1, 1, 0, 0], $gap);
+    rotate([hh,0,-120]) piece(6, 25, [0, 1, 1, 1, 1, 0], $gap);
+    rotate([hp,0,180]) piece(5, 24, [0, 1, 1, 1, 0], $gap);
+    rotate([hh,0,120]) piece(6, 23, [0, 0, 1, 1, 1, 0], $gap);
+    rotate([hh,0,120]) rotate([hh,0,-60]) piece(6, 22, [0, 0, 0, 1, 1, 1], $gap);
+    rotate([hp+pp,0,60]) rotate([0,0,180]) piece(5, 21, [1, 1, 0, 0, 1], $gap);
+    rotate([hh,0,-120]) rotate([hh,180,240]) piece(6, 20, [1, 1, 1, 1, 0, 0], $gap);
+    rotate([hp+pp,180,120]) rotate([0,0,180]) piece(5, 19, [0, 0, 0, 1, 1], $gap);
+    rotate([hh,0,120]) rotate([hh,0,60]) piece(6, 18, [0, 0, 1, 1, 1, 0], $gap);
+    rotate([hh,0,-120]) rotate([hh,0,-60]) piece(6, 17, [0, 0, 0, 1, 1, 1], $gap);
+    rotate([hp+pp,180,-120]) rotate([0,0,180]) piece(5, 16, [0, 0, 1, 1, 1], $gap);
+    rotate([hh,0,-120]) rotate([hh,0,60]) piece(6, 15, [0, 0, 1, 1, 0, 0], $gap);
+    rotate([hp+pp,0,-60]) rotate([0,0,180]) piece(5, 14, [1, 1, 0, 0, 1], $gap);
+    rotate([hh,0,120]) rotate([hh,180,120]) piece(6, 13, [1, 0, 0, 0, 1, 1], $gap);
+    rotate([hh,0,0]) rotate([hh,180,240]) piece(6, 12, [1, 1, 0, 0, 0, 1], $gap);
+    rotate([hp+pp,0,180]) rotate([0,0,180]) piece(5, 11, [1, 0, 0, 0, 1], $gap);
+    rotate([hh,0,0]) rotate([hh,180,120]) piece(6, 10, [1, 0, 0, 0, 0, 1], $gap);
+    rotate([hp,180,120]) piece(5, 9, [1, 1, 0, 0, 1], $gap);
+    rotate([hh,180,60]) piece(6, 8, [1, 0, 0, 0, 1, 1], $gap);
+    rotate([hh,0,-120]) rotate([hh,180,120]) piece(6, 7, [0, 0, 0, 0, 1, 1], $gap);
+    rotate([hh,0,120]) rotate([hh,180,240]) piece(6, 6, [1, 1, 0, 0, 0, 0], $gap);
+    rotate([hp,180,0]) piece(5, 5, [1, 0, 0, 0, 1], $gap);
+    rotate([180,0,0]) piece(6, 4, [0, 1, 1, 1, 0, 0], $gap);
+    rotate([hh,180,180]) piece(6, 3, [0, 1, 0, 0, 0, 0], $gap);
+    rotate([hp,180,-120]) piece(5, 2, [0, 1, 0, 0, 0], $gap);
+    rotate([hh,180,-60]) piece(6, 1, [0, 0, 0, 0, 0, 0], $gap);
 }
