@@ -162,7 +162,7 @@ whole_ball() {
     rotate([hp,0,60]) piece(5, 32, [1, 1, 1, 1, 1], $gap, $round_out);
     piece(6, 31, [1, 1, 1, 1, 0, 1], $gap, $round_out);
     rotate([hh,0,0]) piece(6, 30, [0, 1, 1, 1, 1, 0], $gap, $round_out);
-    rotate([hh,0,0]) rotate([hh,0,60]) piece(6, 29, [0, 1, 1, 1, 1, 0, 1], $gap, $round_out);
+    rotate([hh,0,0]) rotate([hh,0,60]) piece(6, 29, [0, 1, 1, 1, 1, 0], $gap, $round_out);
     rotate([hp+pp,180,0]) rotate([0,0,180]) piece(5, 28, [0, 1, 1, 1, 0], $gap, $round_out);
     rotate([hh,0,0]) rotate([hh,0,-60]) piece(6, 27, [0, 1, 1, 1, 1, 0], $gap, $round_out);
     rotate([hp,0,-60]) piece(5, 26, [0, 1, 1, 0, 0], $gap, $round_out);
